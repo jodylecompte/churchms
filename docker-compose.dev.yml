@@ -1,0 +1,37 @@
+services:
+  app:
+    build:
+      context: .
+      target: deps
+    command: npm run dev
+    volumes:
+      - .:/app
+      - /app/node_modules
+      - /app/.next
+      - uploads:/data/uploads
+    env_file: .env.local
+    ports:
+      - "3000:3000"
+    depends_on:
+      db:
+        condition: service_healthy
+
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: gospelos
+      POSTGRES_PASSWORD: gospelos
+      POSTGRES_DB: gospelos
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata_dev:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U gospelos -d gospelos"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  uploads:
+  pgdata_dev:
