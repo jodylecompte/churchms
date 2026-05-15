@@ -3,6 +3,9 @@ import { notFound } from 'next/navigation'
 import { getSession } from '@/auth/session'
 import { getPersonById } from '@/domain/people/people.service'
 import { PersonForm } from '@/components/features/people/person-form'
+import { EmergencyContactsPanel } from '@/components/features/people/emergency-contacts'
+import { AuthorizedPickupsPanel } from '@/components/features/people/authorized-pickups'
+import { PersonPhotoSection } from '@/components/features/people/person-photo-section'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { ChevronLeft, AlertTriangle } from 'lucide-react'
@@ -23,7 +26,7 @@ export default async function PersonPage({ params }: { params: Promise<{ id: str
     : `${person.firstName} ${person.lastName}`
 
   return (
-    <div className="max-w-2xl space-y-4">
+    <div className="max-w-2xl space-y-6">
       <div className="flex items-center gap-2">
         <Button variant="ghost" size="sm" render={<Link href="/people" />}>
           <ChevronLeft className="h-4 w-4 mr-1" />
@@ -38,10 +41,22 @@ export default async function PersonPage({ params }: { params: Promise<{ id: str
             <Badge variant={person.churchStatus === 'member' ? 'default' : 'secondary'}>
               {person.churchStatus}
             </Badge>
+            {person.officerTitle && (
+              <Badge variant="outline">{person.officerTitle}</Badge>
+            )}
             {person.isMinor && <Badge variant="outline">Minor</Badge>}
+            {!person.directoryVisible && (
+              <Badge variant="secondary" className="text-xs">Hidden from directory</Badge>
+            )}
           </div>
         </div>
       </div>
+
+      <PersonPhotoSection
+        personId={id}
+        initialPhotoKey={person.profilePhotoKey}
+        displayName={displayName}
+      />
 
       {person.allergyNotes && (
         <div className="flex gap-2 rounded-md bg-destructive/10 border border-destructive/30 p-3">
@@ -54,6 +69,10 @@ export default async function PersonPage({ params }: { params: Promise<{ id: str
       )}
 
       <PersonForm person={person} mode="edit" />
+
+      <EmergencyContactsPanel personId={id} />
+
+      {person.isMinor && <AuthorizedPickupsPanel personId={id} />}
     </div>
   )
 }

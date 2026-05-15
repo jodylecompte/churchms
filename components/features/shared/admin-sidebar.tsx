@@ -14,11 +14,12 @@ import {
   SidebarMenuItem,
 } from '@/components/ui/sidebar'
 import { NavUser } from './nav-user'
-import { LayoutDashboard, Users, Baby, Calendar, MessageSquare, Settings } from 'lucide-react'
+import { LayoutDashboard, Users, Home, Baby, Calendar, MessageSquare, Settings } from 'lucide-react'
 
 const navItems = [
   { label: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
   { label: 'People', href: '/people', icon: Users },
+  { label: 'Households', href: '/households', icon: Home },
   { label: 'Check-In', href: '/check-in', icon: Baby },
   { label: 'Volunteers', href: '/volunteers', icon: Calendar },
   { label: 'Boards', href: '/boards', icon: MessageSquare },

@@ -1,5 +1,6 @@
-import { pgTable, text, uuid, boolean, date, timestamp } from 'drizzle-orm/pg-core'
+import { pgTable, text, uuid, boolean, date, timestamp, unique } from 'drizzle-orm/pg-core'
 import { households } from './households'
+import { users } from './users'
 
 export const people = pgTable('people', {
   id: uuid('id').primaryKey().defaultRandom(),
@@ -45,12 +46,16 @@ export const people = pgTable('people', {
   deletedAt: timestamp('deleted_at', { withTimezone: true, mode: 'date' }),
 })
 
-export const personFieldVisibility = pgTable('person_field_visibility', {
-  id: uuid('id').primaryKey().defaultRandom(),
-  personId: uuid('person_id').notNull().references(() => people.id),
-  fieldName: text('field_name').notNull(),
-  visibility: text('visibility').notNull(),
-})
+export const personFieldVisibility = pgTable(
+  'person_field_visibility',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    personId: uuid('person_id').notNull().references(() => people.id),
+    fieldName: text('field_name').notNull(),
+    visibility: text('visibility').notNull(),
+  },
+  (t) => [unique().on(t.personId, t.fieldName)]
+)
 
 export const emergencyContacts = pgTable('emergency_contacts', {
   id: uuid('id').primaryKey().defaultRandom(),
@@ -63,5 +68,22 @@ export const emergencyContacts = pgTable('emergency_contacts', {
   notes: text('notes'),
 })
 
+export const authorizedPickups = pgTable('authorized_pickups', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  childPersonId: uuid('child_person_id').notNull().references(() => people.id),
+  authorizedPersonId: uuid('authorized_person_id').references(() => people.id),
+  externalName: text('external_name'),
+  externalPhone: text('external_phone'),
+  relationship: text('relationship'),
+  isDenied: boolean('is_denied').notNull().default(false),
+  notes: text('notes'),
+  createdByUserId: uuid('created_by_user_id').notNull().references(() => users.id),
+  createdAt: timestamp('created_at', { withTimezone: true, mode: 'date' }).notNull().defaultNow(),
+})
+
 export type Person = typeof people.$inferSelect
 export type NewPerson = typeof people.$inferInsert
+export type EmergencyContact = typeof emergencyContacts.$inferSelect
+export type NewEmergencyContact = typeof emergencyContacts.$inferInsert
+export type AuthorizedPickup = typeof authorizedPickups.$inferSelect
+export type NewAuthorizedPickup = typeof authorizedPickups.$inferInsert
